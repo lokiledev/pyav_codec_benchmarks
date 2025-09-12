@@ -8,17 +8,16 @@ from utils import make_image
 
 def encode_frames(
     frames: typing.Iterable[av.VideoFrame], codec_name: str
-) -> typing.Sequence[av.Packet]:
+) -> tuple[typing.Sequence[av.Packet], float, int]:
     """Measure the encoding performance of a sequence of video frames using given codec_name."""
 
     frame_size = frames[0].width, frames[0].height
     codec = av.Codec(codec_name, "w")
     codec_ctx = codec.create()
-    print(f"{codec_name} is hwaccel: {codec_ctx.is_hwaccel}")
     try:
         codec_ctx.pix_fmt = "yuv420p"
         codec_ctx.width, codec_ctx.height = frame_size
-        codec_ctx.framerate = 20
+        codec_ctx.framerate = 30
 
         packets = []
         packets += codec_ctx.encode(frames[0])
@@ -32,12 +31,35 @@ def encode_frames(
             codec_ctx.flush_buffers()
 
     fps = (len(frames) - 1) / (t2 - t1)
-    print(f"Encoded at {fps:.1f} fps ({codec_name})")
-    return packets
+    total_size = sum(packet.size for packet in packets)
+    return packets, fps, total_size
 
 
 if __name__ == "__main__":
     frames = [make_image(1920, 1080, i, 30) for i in range(30)]
-    encode_frames(frames, "h264")
-    encode_frames(frames, "libx264")
-    encode_frames(frames, "h264_nvenc")
+
+    # List of codecs to test
+    codecs = [
+        "h264",
+        "libx264",
+        "h264_nvenc",
+        "av1",
+        "av1_nvenc",
+        "libaom-av1",
+        "libsvtav1",
+    ]
+
+    # Collect results
+    results = []
+    for codec in codecs:
+        _, fps, total_size = encode_frames(frames, codec)
+        size_kb = total_size / 1024
+        results.append((codec, fps, size_kb))
+
+    # Print markdown table
+    print("\n## Video Codec Performance Results")
+    print()
+    print("| Codec | FPS | Size (KB) |")
+    print("|-------|-----|-----------|")
+    for codec, fps, size_kb in results:
+        print(f"| {codec} | {fps:.1f} | {size_kb:.1f} |")
