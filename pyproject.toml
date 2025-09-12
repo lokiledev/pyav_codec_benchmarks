@@ -1,0 +1,11 @@
+[project]
+name = "video-benchmark"
+version = "0.1.0"
+description = "A benchmark of video encoding and decoding peformance for py av and ffmpeg"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "av>=15.1.0",
+    "numpy>=2.2.6",
+    "opencv-python>=4.11.0.86",
+]
