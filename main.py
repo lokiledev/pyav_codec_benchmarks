@@ -18,7 +18,6 @@ def test_pyav_encoding_benchmark() -> None:
     class ConfigDict(TypedDict):
         codec: str
         hwaccel: bool
-        name: str
 
     class ResultDict(TypedDict):
         resolution: str
@@ -26,22 +25,21 @@ def test_pyav_encoding_benchmark() -> None:
         avg_ms: float
         min_ms: float
         max_ms: float
-        fps: float
+        hwaccel: str
 
     # Standard resolutions from 480p to 1080p
     resolutions = [
         (640, 480),  # 480p
-        (854, 480),  # 480p widescreen
         (1280, 720),  # 720p
         (1920, 1080),  # 1080p
     ]
 
     # Test configurations
     configs: list[ConfigDict] = [
-        {"codec": "h264", "hwaccel": False, "name": "H.264 Software"},
-        {"codec": "h264", "hwaccel": True, "name": "H.264 Hardware"},
-        {"codec": "libx264", "hwaccel": False, "name": "libx264 Software"},
-        {"codec": "libx264", "hwaccel": True, "name": "libx264 Hardware"},
+        {"codec": "h264", "hwaccel": False},
+        {"codec": "h264", "hwaccel": True},
+        {"codec": "libx264", "hwaccel": False},
+        {"codec": "libx264", "hwaccel": True},
     ]
 
     results: list[ResultDict] = []
@@ -113,7 +111,7 @@ def test_pyav_encoding_benchmark() -> None:
                         end_time = time.perf_counter()
                         times.append(end_time - start_time)
                     except Exception as e:
-                        print(f"  Error encoding with {config['name']}: {e}")
+                        print(f"  Error encoding with {config['codec']}: {e}")
                         times = []
                         break
 
@@ -127,20 +125,20 @@ def test_pyav_encoding_benchmark() -> None:
                     results.append(
                         {
                             "resolution": f"{width}x{height}",
-                            "config": config["name"],
+                            "config": config["codec"],
                             "avg_ms": avg_time_ms,
                             "min_ms": min_time_ms,
                             "max_ms": max_time_ms,
-                            "fps": 1000 / avg_time_ms if avg_time_ms > 0 else 0,
+                            "hwaccel": "on" if config["hwaccel"] else "off",
                         }
                     )
 
                     print(
-                        f"  {config['name']}: {avg_time_ms:.2f}ms avg ({1000 / avg_time_ms:.1f} fps)"
+                        f"  {config['codec']}: {avg_time_ms:.2f}ms avg ({1000 / avg_time_ms:.1f} fps)"
                     )
 
             except Exception as e:
-                print(f"  {config['name']}: Failed - {e}")
+                print(f"  {config['codec']}: Failed - {e}")
                 continue
 
     # Print results table
@@ -149,15 +147,15 @@ def test_pyav_encoding_benchmark() -> None:
     print("=" * 100)
     print()
     print(
-        "| Resolution | Configuration | Avg Time (ms) | Min Time (ms) | Max Time (ms) | Est. FPS |"
+        "| Resolution | Configuration | HW Accel | Avg Time (ms) | Min Time (ms) | Max Time (ms) |"
     )
     print(
-        "|------------|---------------|---------------|---------------|---------------|----------|"
+        "|------------|---------------|----------|---------------|---------------|---------------|"
     )
 
     for result in results:
         print(
-            f"| {result['resolution']:>10} | {result['config']:>13} | {result['avg_ms']:>12.2f} | {result['min_ms']:>12.2f} | {result['max_ms']:>12.2f} | {result['fps']:>7.1f} |"
+            f"| {result['resolution']:>10} | {result['config']:>13} | {result['hwaccel']:>8} | {result['avg_ms']:>12.2f} | {result['min_ms']:>12.2f} | {result['max_ms']:>12.2f} |"
         )
 
     print()
