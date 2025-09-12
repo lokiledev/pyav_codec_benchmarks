@@ -6,7 +6,7 @@ between gpu (ie using nvenc) and cpu encoding.
 
 ## Installation
 
-Requires [uv](curl -LsSf https://astral.sh/uv/install.sh | sh)
+Requires [uv](https://docs.astral.sh/uv/guides/install-python/)
 
 ```sh
 uv sync
