@@ -14,7 +14,7 @@ uv sync
 
 ## Run
 
-* Benchmark different h264 and av1 codecs encoding speed and compression
+* Benchmark different h264 and av1 codecs encoding speed and file size on generated images.
 ```
 uv run bench_codecs.py
 ```
@@ -23,8 +23,41 @@ uv run bench_codecs.py
 ```
 uv run bench_h264_encoding_speed.py
 ```
+* Benchmark encoding speed and file size on image dataset
+
+```
+uv run multi_resolution.py [path_to_image_folder]
+```
+For the last one you should have a folder container png images,
+ie captured from a camera.
+**TODO**: Store sample dataset on public hugging face and download in the script.
 
 # Last Results
+
+## Hardware setup
+* cpu
+```
+Architecture:                x86_64
+  CPU op-mode(s):            32-bit, 64-bit
+  Address sizes:             46 bits physical, 48 bits virtual
+  Byte Order:                Little Endian
+CPU(s):                      22
+  On-line CPU(s) list:       0-21
+Vendor ID:                   GenuineIntel
+  Model name:                Intel(R) Core(TM) Ultra 7 155H
+```
+* gpu
+```
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 575.64.03              Driver Version: 575.64.03      CUDA Version: 12.9     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 4050 ...    Off |   00000000:01:00.0 Off |                  N/A |
+```
+
 
 ## Benchmark Constants
 - **Number of frames encoded:** 1800
