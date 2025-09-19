@@ -18,6 +18,8 @@ def encode_frames(
         codec_ctx.pix_fmt = "yuv420p"
         codec_ctx.width, codec_ctx.height = frame_size
         codec_ctx.framerate = 30
+        codec_ctx.max_b_frames = 0
+        codec_ctx.gop_size = 15
 
         packets = []
         packets += codec_ctx.encode(frames[0])
@@ -40,12 +42,9 @@ if __name__ == "__main__":
 
     # List of codecs to test
     codecs = [
-        "h264",
         "libx264",
         "h264_nvenc",
-        "av1",
         "av1_nvenc",
-        "libaom-av1",
         "libsvtav1",
     ]
 
