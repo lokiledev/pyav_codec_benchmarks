@@ -99,6 +99,56 @@ def print_stats(stats: dict):
             )
 
 
+def format_stats_table(stats: dict):
+    """Format stats as a nice markdown table with constants and detailed metrics."""
+
+    first_codec = next(iter(stats))
+    first_resolution = next(iter(stats[first_codec]))
+    n_frames = stats[first_codec][first_resolution]["n_frames"]
+    clip_duration_seconds = n_frames / FRAMERATE
+
+    print("## Benchmark Constants")
+    print(f"- **Number of frames encoded:** {n_frames}")
+    print(f"- **FPS:** {FRAMERATE}")
+    print(f"- **Total duration of clip:** {clip_duration_seconds:.2f} seconds")
+    print()
+
+    print("## Encoding Performance Results")
+    print()
+    print(
+        "| Resolution | Codec | Encoding Time/Frame (ms) | Real Time Ratio | Compressed Size (MB) | Extrapolated 1h Size (MB) |"
+    )
+    print(
+        "|------------|-------|-------------------------|-----------------|---------------------|---------------------------|"
+    )
+
+    # Sort resolutions for consistent output
+    all_resolutions = set()
+    for codec_data in stats.values():
+        all_resolutions.update(codec_data.keys())
+    sorted_resolutions = sorted(all_resolutions)
+
+    for resolution in sorted_resolutions:
+        for codec_name in stats:
+            if resolution in stats[codec_name]:
+                data = stats[codec_name][resolution]
+
+                encoding_time_seconds = data["duration"].total_seconds()
+                encoding_time_per_frame_ms = (encoding_time_seconds / n_frames) * 1000
+                real_time_ratio = encoding_time_seconds / clip_duration_seconds
+                compressed_size_mb = data["total_size"] / (1024 * 1024)
+                extrapolated_1h_size_mb = compressed_size_mb * (
+                    3600 / clip_duration_seconds
+                )
+                resolution_str = f"{resolution[0]}x{resolution[1]}"
+                codec_display = codec_name.replace("lib", "")
+                print(
+                    f"| {resolution_str} | {codec_display} | {encoding_time_per_frame_ms:.2f} | {real_time_ratio:.2f}x | {compressed_size_mb:.2f} | {extrapolated_1h_size_mb:.1f} |"
+                )
+
+    print()
+
+
 def main(images_dir: str):
     src_images = Path(images_dir)
 
@@ -126,7 +176,7 @@ def main(images_dir: str):
                 "total_size": total_size,
             }
 
-    print_stats(stats)
+    format_stats_table(stats)
 
 
 if __name__ == "__main__":
