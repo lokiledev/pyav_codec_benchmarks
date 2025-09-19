@@ -53,6 +53,7 @@ def encode_frames(
     codec_ctx.time_base = Fraction(1, FRAMERATE)
     codec_ctx.max_b_frames = 0
     codec_ctx.gop_size = 15
+    codec_ctx.options = {"crf": "30"}
     total_size = 0
     total_time = 0
 
